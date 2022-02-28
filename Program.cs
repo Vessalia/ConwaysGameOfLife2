@@ -8,8 +8,8 @@ namespace ConwaysGameOfLife2
         [STAThread]
         static void Main()
         {
-            using (var game = new Game(GameWindowSettings.Default, NativeWindowSettings.Default))
-                game.Run();
+            using var game = new Game(GameWindowSettings.Default, NativeWindowSettings.Default);
+            game.Run();
         }
     }
 }
