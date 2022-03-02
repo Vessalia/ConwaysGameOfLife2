@@ -10,11 +10,17 @@ namespace ConwaysGameOfLife2
     {
         public readonly int handle;
 
+        public readonly int width;
+        public readonly int height;
+
         public Texture(int width, int height)
         {
             handle = GL.GenTexture();
 
             Use(TextureUnit.Texture0);
+
+            this.width = width;
+            this.height = height;
 
             byte[] arr = new byte[width * height];
             Random r = new Random();

@@ -11,7 +11,12 @@ namespace ConwaysGameOfLife2
     {
         Shader shader;
 
+        int screenWidth;
+        int screenHeight;
+
         int VAO;
+
+        float rot = 0;
 
         int positionVBO;
         int texCoordVBO;
@@ -22,6 +27,15 @@ namespace ConwaysGameOfLife2
 
         int readFrameBuffer;
         int writeFrameBuffer;
+
+        Vector3 position = new Vector3(0.0f, 0.0f, 3.0f);
+        Vector3 front = new Vector3(0.0f, 0.0f, -1.0f);
+        Vector3 up = new Vector3(0.0f, 1.0f, 0.0f);
+
+        float yaw = -MathF.PI / 2;
+        float pitch = 0;
+
+        float speed = 4f;
 
         float[] verticies = 
         {
@@ -79,12 +93,12 @@ namespace ConwaysGameOfLife2
 
 
 
-            readTexture = new Texture(ClientRectangle.Size.X, ClientRectangle.Size.Y);
+            readTexture = new Texture(3840, 2160);
             readFrameBuffer = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, readFrameBuffer);
             GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, readTexture.handle, 0);
 
-            writeTexture = new Texture(ClientRectangle.Size.X, ClientRectangle.Size.Y);
+            writeTexture = new Texture(3840, 2160);
             writeFrameBuffer = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, writeFrameBuffer);
             GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, writeTexture.handle, 0);
@@ -93,6 +107,11 @@ namespace ConwaysGameOfLife2
 
 
             Title = "Conway's Game of Life 2.0";
+
+            screenWidth = ClientRectangle.Size.X;
+            screenHeight = ClientRectangle.Size.Y;
+
+            GL.Enable(EnableCap.DepthTest);
 
             base.OnLoad();
         }
@@ -112,18 +131,40 @@ namespace ConwaysGameOfLife2
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             shader.Use();
             shader.SetInt("state", 0);
-            shader.SetVec2("size", new Vector2(ClientRectangle.Size.X, ClientRectangle.Size.Y));
-            readTexture.Use(TextureUnit.Texture0);
+            shader.SetVec2("size", new Vector2(readTexture.width, readTexture.height));
+
+            Matrix4 model = Matrix4.Identity;
+            Matrix4 view = Matrix4.Identity;
+            Matrix4 projection = Matrix4.Identity;
+
+            shader.SetMat4("model", model);
+            shader.SetMat4("view", view);
+            shader.SetMat4("projection", projection);
 
             GL.BindVertexArray(VAO);
+            GL.Viewport(0, 0, readTexture.width, readTexture.height);
+
+            readTexture.Use(TextureUnit.Texture0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, writeFrameBuffer);
             GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
-            
+
+            GL.Viewport(0, 0, screenWidth, screenHeight);
+
+            model = Matrix4.CreateRotationY(rot);
+            view = Matrix4.LookAt(position, position + front, up);
+            projection = Matrix4.CreatePerspectiveFieldOfView(MathF.PI / 4, screenWidth / screenHeight, 0.1f, 100f);
+
+            rot += MathF.PI / 180;
+
+            shader.SetMat4("model", model);
+            shader.SetMat4("view", view);
+            shader.SetMat4("projection", projection);
+
             writeTexture.Use(TextureUnit.Texture0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -138,12 +179,84 @@ namespace ConwaysGameOfLife2
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            if (KeyboardState.IsKeyDown(Keys.W))
+            {
+                position += front * speed * (float)e.Time; //Forward 
+            }
 
+            if (KeyboardState.IsKeyDown(Keys.S))
+            {
+                position -= front * speed * (float)e.Time; //Backwards
+            }
+
+            if (KeyboardState.IsKeyDown(Keys.A))
+            {
+                position -= Vector3.Normalize(Vector3.Cross(front, up)) * speed * (float)e.Time; //Left
+            }
+
+            if (KeyboardState.IsKeyDown(Keys.D))
+            {
+                position += Vector3.Normalize(Vector3.Cross(front, up)) * speed * (float)e.Time; //Right
+            }
+
+            if (KeyboardState.IsKeyDown(Keys.Space))
+            {
+                position += up * speed * (float)e.Time; //Up 
+            }
+
+            if (KeyboardState.IsKeyDown(Keys.LeftShift))
+            {
+                position -= up * speed * (float)e.Time; //Down
+            }
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            CursorGrabbed = true;
+            CursorVisible = false;
+
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            CursorGrabbed = false;
+            CursorVisible = true;
+
+            base.OnMouseUp(e);
+        }
+
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            float sensitivity = 0.002f;
+
+            if(MouseState.IsButtonDown(MouseButton.Button1))
+            {
+                yaw += e.DeltaX * sensitivity;
+                pitch -= e.DeltaY * sensitivity;
+
+                if (pitch > MathF.PI / 2)
+                {
+                    pitch = MathF.PI / 2;
+                }
+                else if (pitch < -MathF.PI / 2)
+                {
+                    pitch = -MathF.PI / 2;
+                }
+
+                front.X = MathF.Cos(pitch) * MathF.Cos(yaw);
+                front.Y = MathF.Sin(pitch);
+                front.Z = MathF.Cos(pitch) * MathF.Sin(yaw);
+                front = Vector3.Normalize(front);
+            }
+
+            base.OnMouseMove(e);
         }
 
         protected override void OnResize(ResizeEventArgs e)
         {
-            GL.Viewport(0, 0, e.Width, e.Height);
+            screenWidth = e.Width;
+            screenHeight = e.Height;
             
             base.OnResize(e);
         }

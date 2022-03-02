@@ -40,5 +40,3 @@ C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\net
 C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\netcoreapp3.1\SixLabors.ImageSharp.dll
 C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\netcoreapp3.1\System.Text.Encoding.CodePages.dll
 C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Text.Encoding.CodePages.dll
-C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\netcoreapp3.1\Assets\dying-tile.png
-C:\Users\Nathan\source\repos\ConwaysGameOfLife2\ConwaysGameOfLife2\bin\Debug\netcoreapp3.1\Assets\live-tile.png
