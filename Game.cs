@@ -39,24 +39,37 @@ namespace ConwaysGameOfLife2
 
         float[] verticies = 
         {
-            -1.0f, -1.0f, 0.0f, //Bottom-left vertex
-             1.0f, -1.0f, 0.0f, //Bottom-right vertex
-            -1.0f,  1.0f, 0.0f, //Top-left vertex
-             1.0f,  1.0f, 0.0f  //Top-right vertex
+            -1.0f, -1.0f, -1.0f, //Bottom-left back vertex
+             1.0f, -1.0f, -1.0f, //Bottom-right back vertex
+            -1.0f,  1.0f, -1.0f, //Top-left back vertex
+             1.0f,  1.0f, -1.0f, //Top-right back vertex
+
+            -1.0f, -1.0f, 1.0f, //Bottom-left front vertex
+             1.0f, -1.0f, 1.0f, //Bottom-right front vertex
+            -1.0f,  1.0f, 1.0f, //Top-left font vertex
+             1.0f,  1.0f, 1.0f, //Top-right font vertex
         };
 
         float[] UV =
         {
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f
+            0.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
+
+            0.0f, 0.0f, 1.0f,
+            1.0f, 0.0f, 1.0f,
+            0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f
         };
 
         uint[] indices =
         {
             0, 1, 2,
-            2, 1, 3
+            2, 1, 3,
+
+            4, 5, 6,
+            6, 5, 7
         };
 
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
@@ -87,7 +100,7 @@ namespace ConwaysGameOfLife2
             texCoordVBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, texCoordVBO);
             GL.BufferData(BufferTarget.ArrayBuffer, UV.Length * sizeof(float), UV, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(shader.GetAttribLocation("aTexCoord"), 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+            GL.VertexAttribPointer(shader.GetAttribLocation("aTexCoord"), 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
             GL.EnableVertexAttribArray(1);
 
 
@@ -159,7 +172,7 @@ namespace ConwaysGameOfLife2
             view = Matrix4.LookAt(position, position + front, up);
             projection = Matrix4.CreatePerspectiveFieldOfView(MathF.PI / 4, screenWidth / screenHeight, 0.1f, 100f);
 
-            rot += MathF.PI / 180;
+            rot += MathF.PI / 18000;
 
             shader.SetMat4("model", model);
             shader.SetMat4("view", view);
