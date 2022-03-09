@@ -9,18 +9,19 @@ namespace ConwaysGameOfLife2
 {
     public class Game : GameWindow
     {
-        Shader shader;
+        Shader conwayShader;
+        Shader defaultShader;
 
         int screenWidth;
         int screenHeight;
 
-        int VAO;
+        int cubeVAO;
+        int quadVAO;
 
         float rot = 0;
 
         int positionVBO;
-        int texCoordVBO;
-        int EBO;
+        int quadVBO;
 
         Texture readTexture;
         Texture writeTexture;
@@ -37,39 +38,59 @@ namespace ConwaysGameOfLife2
 
         float speed = 4f;
 
-        float[] verticies = 
-        {
-            -1.0f, -1.0f, -1.0f, //Bottom-left back vertex
-             1.0f, -1.0f, -1.0f, //Bottom-right back vertex
-            -1.0f,  1.0f, -1.0f, //Top-left back vertex
-             1.0f,  1.0f, -1.0f, //Top-right back vertex
+        float[] vertices = {
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-            -1.0f, -1.0f, 1.0f, //Bottom-left front vertex
-             1.0f, -1.0f, 1.0f, //Bottom-right front vertex
-            -1.0f,  1.0f, 1.0f, //Top-left font vertex
-             1.0f,  1.0f, 1.0f, //Top-right font vertex
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
         };
 
-        float[] UV =
+        float[] quad =
         {
-            0.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
+             -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+              1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+             -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 
-            0.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f
-        };
-
-        uint[] indices =
-        {
-            0, 1, 2,
-            2, 1, 3,
-
-            4, 5, 6,
-            6, 5, 7
+             -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+              1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+              1.0f,  1.0f, 0.0f, 1.0f, 1.0f
         };
 
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
@@ -79,28 +100,38 @@ namespace ConwaysGameOfLife2
 
         protected override void OnLoad()
         {
-            shader = new Shader("Shaders/shader.vert.glsl", "Shaders/shader.frag.glsl");
-
-            VAO = GL.GenVertexArray();
-            GL.BindVertexArray(VAO);
-
-            EBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+            conwayShader = new Shader("Shaders/shader.vert.glsl", "Shaders/conway.frag.glsl");
+            defaultShader = new Shader("Shaders/shader.vert.glsl", "Shaders/shader.frag.glsl");
 
 
 
+
+
+            cubeVAO = GL.GenVertexArray();
+            GL.BindVertexArray(cubeVAO);
 
             positionVBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, positionVBO);
-            GL.BufferData(BufferTarget.ArrayBuffer, verticies.Length * sizeof(float), verticies, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(shader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(defaultShader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
             GL.EnableVertexAttribArray(0);
 
-            texCoordVBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, texCoordVBO);
-            GL.BufferData(BufferTarget.ArrayBuffer, UV.Length * sizeof(float), UV, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(shader.GetAttribLocation("aTexCoord"), 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            GL.VertexAttribPointer(defaultShader.GetAttribLocation("aTexCoord"), 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
+
+
+
+
+            quadVAO = GL.GenVertexArray();
+            GL.BindVertexArray(quadVAO);
+
+            quadVBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, quadVBO);
+            GL.BufferData(BufferTarget.ArrayBuffer, quad.Length * sizeof(float), quad, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(conwayShader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(0);
+
+            GL.VertexAttribPointer(conwayShader.GetAttribLocation("aTexCoord"), 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
             GL.EnableVertexAttribArray(1);
 
 
@@ -131,13 +162,14 @@ namespace ConwaysGameOfLife2
 
         protected override void OnUnload()
         {
-            shader.Dispose();
+            conwayShader.Dispose();
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.DeleteBuffer(positionVBO);
-            GL.DeleteBuffer(texCoordVBO);
-            GL.DeleteVertexArray(VAO);
+            GL.DeleteBuffer(quadVBO);
+            GL.DeleteVertexArray(cubeVAO);
+            GL.DeleteVertexArray(quadVAO);
 
             base.OnUnload();
         }
@@ -146,25 +178,30 @@ namespace ConwaysGameOfLife2
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            shader.Use();
-            shader.SetInt("state", 0);
-            shader.SetVec2("size", new Vector2(readTexture.width, readTexture.height));
+            conwayShader.Use();
+            conwayShader.SetInt("state", 0);
+            conwayShader.SetVec2("size", new Vector2(readTexture.width, readTexture.height));
 
             Matrix4 model = Matrix4.Identity;
             Matrix4 view = Matrix4.Identity;
             Matrix4 projection = Matrix4.Identity;
 
-            shader.SetMat4("model", model);
-            shader.SetMat4("view", view);
-            shader.SetMat4("projection", projection);
+            conwayShader.SetMat4("model", model);
+            conwayShader.SetMat4("view", view);
+            conwayShader.SetMat4("projection", projection);
 
-            GL.BindVertexArray(VAO);
+            GL.BindVertexArray(quadVAO);
             GL.Viewport(0, 0, readTexture.width, readTexture.height);
 
             readTexture.Use(TextureUnit.Texture0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, writeFrameBuffer);
-            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, quad.Length / 5);
+
+            defaultShader.Use();
+            defaultShader.SetInt("tex", 0);
+
+            GL.BindVertexArray(cubeVAO);
 
             GL.Viewport(0, 0, screenWidth, screenHeight);
 
@@ -174,14 +211,14 @@ namespace ConwaysGameOfLife2
 
             rot += MathF.PI / 18000;
 
-            shader.SetMat4("model", model);
-            shader.SetMat4("view", view);
-            shader.SetMat4("projection", projection);
+            defaultShader.SetMat4("model", model);
+            defaultShader.SetMat4("view", view);
+            defaultShader.SetMat4("projection", projection);
 
             writeTexture.Use(TextureUnit.Texture0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
 
             SwapTextureFaces();
 
