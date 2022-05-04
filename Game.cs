@@ -41,7 +41,7 @@ namespace ConwaysGameOfLife2
 
         float speed = 4f;
 
-        Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
+        Vector3 lightPos = new Vector3(1.2f, 2.0f, 1.0f);
         Vector3 lightColour = new Vector3(1.0f, 1.0f, 1.0f);
 
         float[] vertices = { // xCoord, yCoord, zCoord, texXCoord, texYCoord, normX, normY, normZ
