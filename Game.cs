@@ -44,7 +44,7 @@ namespace ConwaysGameOfLife2
         Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         Vector3 lightColour = new Vector3(1.0f, 1.0f, 1.0f);
 
-        float[] vertices = {
+        float[] vertices = { // xCoord, yCoord, zCoord, texXCoord, texYCoord, normX, normY, normZ
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
              0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
              0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
@@ -248,6 +248,7 @@ namespace ConwaysGameOfLife2
 
             defaultShader.SetVec3("lightColour", lightColour);
             defaultShader.SetVec3("lightPos", lightPos);
+            defaultShader.SetVec3("viewPos", position);
 
             GL.BindVertexArray(cubeVAO);
             GL.Viewport(0, 0, screenWidth, screenHeight);
@@ -256,7 +257,7 @@ namespace ConwaysGameOfLife2
             view = Matrix4.LookAt(position, position + front, up);
             projection = Matrix4.CreatePerspectiveFieldOfView(MathF.PI / 4, screenWidth / screenHeight, 0.1f, 100f);
 
-            rot += MathF.PI / 180;
+            rot += MathF.PI / 1800;
 
             defaultShader.SetMat4("model", model);
             defaultShader.SetMat4("view", view);
