@@ -11,17 +11,20 @@ namespace ConwaysGameOfLife2
     {
         Shader conwayShader;
         Shader defaultShader;
+        Shader lightlampShader;
 
         int screenWidth;
         int screenHeight;
 
         int cubeVAO;
         int quadVAO;
+        int lampVAO;
 
         float rot = 0;
 
         int positionVBO;
         int quadVBO;
+        int lampVBO;
 
         Texture readTexture;
         Texture writeTexture;
@@ -37,6 +40,9 @@ namespace ConwaysGameOfLife2
         float pitch = 0;
 
         float speed = 4f;
+
+        Vector3 lightPos = new Vector3(1.2f, 1.0f, 2.0f);
+        Vector3 lightColour = new Vector3(1.0f, 1.0f, 1.0f);
 
         float[] vertices = {
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -102,7 +108,7 @@ namespace ConwaysGameOfLife2
         {
             conwayShader = new Shader("Shaders/shader.vert.glsl", "Shaders/conway.frag.glsl");
             defaultShader = new Shader("Shaders/shader.vert.glsl", "Shaders/shader.frag.glsl");
-
+            lightlampShader = new Shader("Shaders/lightlamp.vert.glsl", "Shaders/lightlamp.frag.glsl");
 
 
 
@@ -114,10 +120,10 @@ namespace ConwaysGameOfLife2
             GL.BindBuffer(BufferTarget.ArrayBuffer, positionVBO);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(defaultShader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(defaultShader.GetAttribLocation("aPosition"));
 
             GL.VertexAttribPointer(defaultShader.GetAttribLocation("aTexCoord"), 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(defaultShader.GetAttribLocation("aTexCoord"));
 
 
 
@@ -129,10 +135,22 @@ namespace ConwaysGameOfLife2
             GL.BindBuffer(BufferTarget.ArrayBuffer, quadVBO);
             GL.BufferData(BufferTarget.ArrayBuffer, quad.Length * sizeof(float), quad, BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(conwayShader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(conwayShader.GetAttribLocation("aPosition"));
 
             GL.VertexAttribPointer(conwayShader.GetAttribLocation("aTexCoord"), 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(conwayShader.GetAttribLocation("aTexCoord"));
+
+
+
+
+            lampVAO = GL.GenVertexArray();
+            GL.BindVertexArray(lampVAO);
+
+            lampVBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, lampVBO);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(conwayShader.GetAttribLocation("aPosition"), 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(conwayShader.GetAttribLocation("aPosition"));
 
 
 
@@ -178,9 +196,30 @@ namespace ConwaysGameOfLife2
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            lightlampShader.Use();
+
+            lightlampShader.SetVec3("lightColour", lightColour);
+
+            Matrix4 lampMatrix = Matrix4.Identity;
+            lampMatrix *= Matrix4.CreateScale(0.2f);
+            lampMatrix *= Matrix4.CreateTranslation(lightPos);
+
+            lightlampShader.SetMat4("model", lampMatrix);
+            lightlampShader.SetMat4("view", Matrix4.LookAt(position, position + front, up));
+            lightlampShader.SetMat4("projection", Matrix4.CreatePerspectiveFieldOfView(MathF.PI / 4, screenWidth / screenHeight, 0.1f, 100f));
+
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
+
+
+
+
             conwayShader.Use();
             conwayShader.SetInt("state", 0);
             conwayShader.SetVec2("size", new Vector2(readTexture.width, readTexture.height));
+
+            GL.BindVertexArray(lampVAO);
+            GL.Viewport(0, 0, screenWidth, screenHeight);
 
             Matrix4 model = Matrix4.Identity;
             Matrix4 view = Matrix4.Identity;
@@ -198,11 +237,15 @@ namespace ConwaysGameOfLife2
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, writeFrameBuffer);
             GL.DrawArrays(PrimitiveType.Triangles, 0, quad.Length / 5);
 
+
+
+
             defaultShader.Use();
             defaultShader.SetInt("tex", 0);
 
-            GL.BindVertexArray(cubeVAO);
+            defaultShader.SetVec3("lightColour", lightColour);
 
+            GL.BindVertexArray(cubeVAO);
             GL.Viewport(0, 0, screenWidth, screenHeight);
 
             model = Matrix4.CreateRotationY(rot);
@@ -219,6 +262,9 @@ namespace ConwaysGameOfLife2
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
+
+
+
 
             SwapTextureFaces();
 

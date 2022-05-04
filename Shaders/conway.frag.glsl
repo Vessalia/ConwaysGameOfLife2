@@ -19,7 +19,7 @@ vec4 getColour(int x, int y)
 float get(int x, int y)
 {
     vec4 colour = getColour(x, y);
-    return round(colour.r * 0.4 + colour.b * 0.2 + colour.b * 0.4);
+    return round(colour.r / 3 + colour.g / 3 + colour.b / 3);
 }
 
 void main() 

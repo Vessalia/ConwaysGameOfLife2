@@ -87,7 +87,7 @@ namespace ConwaysGameOfLife2
 
         public void SetBool(string name, bool value)
         {
-            GL.Uniform1(GL.GetUniformLocation(handle, name), value ? 1: 0);
+            GL.Uniform1(GL.GetUniformLocation(handle, name), value ? 1 : 0);
         }
 
         public void SetInt(string name, int value)
