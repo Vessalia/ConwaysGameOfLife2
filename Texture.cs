@@ -22,14 +22,17 @@ namespace ConwaysGameOfLife2
             this.width = width;
             this.height = height;
 
-            byte[] arr = new byte[width * height];
+            byte[] arr = new byte[4 * width * height];
             Random r = new Random();
-            for(int i = 0; i < arr.Length; i++)
+            for(int i = 0; i < arr.Length; i += 4)
             {
-                arr[i] = (byte)r.Next(0, 255);
+                arr[i    ] = (byte)r.Next(0, 255);
+                arr[i + 1] = (byte)r.Next(0, 255);
+                arr[i + 2] = (byte)r.Next(0, 255);
+                arr[i + 3] = 255;
             }
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, arr);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, arr);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
