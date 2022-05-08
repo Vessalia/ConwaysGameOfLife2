@@ -27,6 +27,7 @@ void main()
     int sum = int(get(-1,  1) + get( 0,  1) + get( 1,  1) +
                   get(-1,  0) +               get( 1,  0) +
                   get(-1, -1) + get( 0, -1) + get( 1, -1));
+
     if (sum == 3) 
     {
         vec4 neighbours[3];

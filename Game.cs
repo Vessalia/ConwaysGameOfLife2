@@ -236,6 +236,7 @@ namespace ConwaysGameOfLife2
             GL.Viewport(0, 0, readTexture.width, readTexture.height);
 
             readTexture.Use(TextureUnit.Texture0);
+            readTexture.Use(TextureUnit.Texture1);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, writeFrameBuffer);
             GL.DrawArrays(PrimitiveType.Triangles, 0, quad.Length / 5);
@@ -246,9 +247,16 @@ namespace ConwaysGameOfLife2
             defaultShader.Use();
             defaultShader.SetInt("tex", 0);
 
-            defaultShader.SetVec3("lightColour", lightColour);
-            defaultShader.SetVec3("lightPos", lightPos);
             defaultShader.SetVec3("viewPos", position);
+
+            defaultShader.SetInt("material.diffuse", 0);
+            defaultShader.SetInt("material.specular", 1);
+            defaultShader.SetFloat("material.shininess", 64.0f);
+
+            defaultShader.SetVec3("light.ambient", lightColour / 10);
+            defaultShader.SetVec3("light.diffuse", lightColour / 2);
+            defaultShader.SetVec3("light.specular", lightColour);
+            defaultShader.SetVec3("light.position", lightPos);
 
             GL.BindVertexArray(cubeVAO);
             GL.Viewport(0, 0, screenWidth, screenHeight);
