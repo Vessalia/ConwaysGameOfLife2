@@ -41,7 +41,7 @@ namespace ConwaysGameOfLife2
 
         float speed = 4f;
 
-        Vector3 lightPos = new Vector3(1.2f, 2.0f, 1.0f);
+        Vector3 lightPos = new Vector3(1.0f, 1.8f, 0.8f);
         Vector3 lightColour = new Vector3(1.0f, 1.0f, 1.0f);
 
         float[] vertices = { // xCoord, yCoord, zCoord, texXCoord, texYCoord, normX, normY, normZ
@@ -245,7 +245,6 @@ namespace ConwaysGameOfLife2
 
 
             defaultShader.Use();
-            defaultShader.SetInt("tex", 0);
 
             defaultShader.SetVec3("viewPos", position);
 
@@ -257,6 +256,10 @@ namespace ConwaysGameOfLife2
             defaultShader.SetVec3("light.diffuse", lightColour / 2);
             defaultShader.SetVec3("light.specular", lightColour);
             defaultShader.SetVec3("light.position", lightPos);
+
+            defaultShader.SetFloat("light.constant", 1.0f);
+            defaultShader.SetFloat("light.linear", 0.09f);
+            defaultShader.SetFloat("light.quadratic", 0.032f);
 
             GL.BindVertexArray(cubeVAO);
             GL.Viewport(0, 0, screenWidth, screenHeight);

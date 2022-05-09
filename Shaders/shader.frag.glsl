@@ -18,6 +18,10 @@ struct Light
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+	
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 
@@ -28,8 +32,13 @@ uniform vec3 viewPos;
 
 void main()
 {
+	vec3 lightVec = light.position - fragPos;
+
+	float distance = length(lightVec);
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
 	vec3 norm = normalize(normal);
-	vec3 lightDir = normalize(light.position - fragPos);  
+	vec3 lightDir = normalize(lightVec);  
 	float proj = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * proj * vec3(texture(material.diffuse, texCoord));
 	
@@ -40,5 +49,5 @@ void main()
 
 	vec3 ambientLighting = light.ambient * vec3(texture(material.diffuse, texCoord));
 
-	fragColor = texture(tex, texCoord) * vec4(ambientLighting + diffuse + specular, 1.0);
+	fragColor = texture(tex, texCoord) * vec4(attenuation * (ambientLighting + diffuse + specular), 1.0);
 }
