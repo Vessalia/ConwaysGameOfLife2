@@ -27,7 +27,7 @@ void main()
     int sum = int(get(-1,  1) + get( 0,  1) + get( 1,  1) +
                   get(-1,  0) +               get( 1,  0) +
                   get(-1, -1) + get( 0, -1) + get( 1, -1));
-                  sum = 2;
+
     if (sum == 3) 
     {
         vec4 neighbours[3];
@@ -75,8 +75,7 @@ void main()
     }
     else if (sum == 2)
     {
-        fragColour = vec4(1, 1, 1, 1);
-        //fragColour = vec4(getColour(0, 0).rgb, 1.0);
+        fragColour = vec4(getColour(0, 0).rgb, 1.0);
     }
     else
     {
